@@ -27,29 +27,28 @@ class ChatService:
         return result.scalars().all()
 
     async def process_user_message(self, conversation_id: int, user_message: str) -> ChatResponse:
-        # 1. Verificar si existe la conversación (omitido por brevedad, asumir que sí)
+        """Procesa el mensaje del usuario, llama al LLM y guarda la respuesta"""
         
-        # 2. Guardar mensaje del usuario en DB
+        # 1. Guardar mensaje del usuario en DB
         user_msg_db = Message(conversation_id=conversation_id, role="user", content=user_message)
         self.db.add(user_msg_db)
         # Commit parcial para que el mensaje ya sea parte de la historia si falla el LLM
         await self.db.commit() 
 
-        # 3. Recuperar historial completo para contexto
+        # 2. Recuperar historial completo para contexto
         history_objs = await self.get_conversation_history(conversation_id)
         
         # Convertir objetos SQLAlchemy a lista de dicts para el LLM
         history_dicts = [{"role": m.role, "content": m.content} for m in history_objs]
 
-        # 4. Llamar al LLM (Nota: Aquí estamos enviando el historial completo incluyendo el actual)
+        # 3. Llamar al LLM (Nota: Aquí estamos enviando el historial completo incluyendo el actual)
         # Ajuste: el prompt manager espera el mensaje actual separado o incluido. 
-        # Simplifiquemos: Pasamos todo menos el último como historial
         ai_response_text = await self.llm.generate_response(
             message=user_message, 
             history=history_dicts[:-1] # Excluir el mensaje actual que acabamos de guardar
         )
 
-        # 5. Guardar respuesta de IA en DB
+        # 4. Guardar respuesta de IA en DB
         ai_msg_db = Message(conversation_id=conversation_id, role="assistant", content=ai_response_text)
         self.db.add(ai_msg_db)
         await self.db.commit()

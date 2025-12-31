@@ -42,5 +42,4 @@ async def send_message(
     try:
         return await service.process_user_message(conversation_id, request.message)
     except Exception as e:
-        # Aquí deberías manejar si el ID no existe
         raise HTTPException(status_code=500, detail=str(e))

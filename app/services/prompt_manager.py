@@ -14,10 +14,10 @@ class PromptManager:
 
     @staticmethod
     def build_messages(user_message: str, history: List[Dict[str, str]] = None) -> List[Dict[str, str]]:
-        """Construye la lista de mensajes para el LLM, incluyendo historial."""
+        """Se construye la lista de mensajes para el LLM, incluyendo historial."""
         messages = []
         
-        # System Prompt (Aquí podrías inyectar fechas dinámicas, contexto de usuario, etc.)
+        # System Prompt 
         messages.append({
             "role": "system", 
             "content": PromptManager.SYSTEM_PROMPT_TEMPLATE.format(
@@ -26,7 +26,7 @@ class PromptManager:
             )
         })
 
-        # Historial de chat (para mantener contexto)
+        # Historial de chat
         if history:
             messages.extend(history)
 
