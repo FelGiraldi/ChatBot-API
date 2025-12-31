@@ -1,0 +1,24 @@
+# Entornos virtuales
+venv/
+env/
+.env
+
+# Archivos de entorno y secretos (CRÍTICO)
+.env
+.env.local
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Pytest
+.pytest_cache/
+
+# Distribución y builds
+dist/
+build/
+*.egg-info/
+
+# Docker
+postgres_data/

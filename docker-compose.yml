@@ -1,0 +1,38 @@
+services:
+  # Servicio de Base de Datos
+  db:
+    image: postgres:16
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=chatbot_db
+    ports:
+      - "5432:5432" # Expuesto al host para poder inspeccionar con herramientas externas
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Servicio de API (Tu código)
+  web:
+    build: .
+    restart: on-failure
+    ports:
+      - "8000:8000"
+    environment:
+      # IMPORTANTE: Dentro de la red de Docker, el host no es 'localhost', es el nombre del servicio 'db'
+      - DATABASE_URL=postgresql+asyncpg://postgres:password@db:5432/chatbot_db
+      # Pasamos la API Key desde tu archivo .env local
+      - GROQ_API_KEY=${GROQ_API_KEY}
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - .env
+
+volumes:
+  postgres_data:
